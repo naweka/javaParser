@@ -33,7 +33,7 @@
 
 Сущность *Здание*:
 * \[ключ\] number
-* \[ключ\] id_
+* id_
 * address (адрес здания)
 * material (материал, из которого построено здание)
 * habited (жилое ли здание?)
@@ -47,12 +47,14 @@
 
 ## Парсинг данных
 
+### Создание базового парсера
+
 Напишем парсер CSV. Работает он так:
 
 Считаем файл, будем проходиться построчно:
 
 ```java
-public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException {
         Utils.parseData("Книга1.csv");
         List<Building> parsedBuildings = Utils.getParsedBuildings();
         List<Prefix> parsedPrefixes = Utils.getParsedPrefixes();
@@ -115,6 +117,8 @@ public static void main(String[] args) throws IOException {
 
 ## Создание базы данных SQLite и подключение ее к проекту
 
+### Создание файла базы данных
+
 Для создания воспользуемся утилитой [SQLite Administrator](http://sqliteadmin.orbmu2k.de/)
 Интерфейс выглядит достаточно просто:
 
@@ -122,13 +126,26 @@ public static void main(String[] args) throws IOException {
 
 Создадим файл базы, руководствуясь [этой](https://habr.com/ru/sandbox/88039/) статьёй
 
+### Подключение базы к проекту
+
 Загрузим библиотеку для работы с SQLite [здесь](http://www.java2s.com/Code/Jar/s/Downloadsqlitejdbc372jar.htm#google_vignette)
 
 Теперь проект выглядит вот так:
 
 ![image](https://user-images.githubusercontent.com/92515117/147116585-ea45ba6a-2b50-41cb-8da7-56af2ee2d2a5.png)
 
-*Примечание: приложение "SQLite Administrator" необходимо только для создания базы. После этого его можно удалить.*
+Как видим, здесь присутствует всё необходимое
 
+> *Примечание: приложение "SQLite Administrator" необходимо только для создания базы. После этого его можно удалить.*
 
+Подключаем базу данных:
+
+```java
+    public static void connect(String dbName) throws ClassNotFoundException, SQLException {
+        System.out.println("Подключение к базе данных \""+dbName+"\"...");
+        Class.forName("org.sqlite.JDBC");
+        connection = DriverManager.getConnection("jdbc:sqlite:"+dbName);
+        System.out.println("База \""+dbName+"\" подключена!");
+    }
+```
 
