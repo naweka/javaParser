@@ -50,10 +50,10 @@
 Напишем парсер CSV. Работает он так:
 
 Считаем файл, будем проходиться построчно:
-![image](https://user-images.githubusercontent.com/92515117/147103365-05686280-172e-4c77-8b01-f23d7de6ed4f.png)
+![image](https://user-images.githubusercontent.com/92515117/147106588-ed84e0d4-5091-4bd6-b222-c0453987a0f1.png)
 
 Затем обрабатываем строку, достаем из нее все данные, которые "можно унести с собой":
-![image](https://user-images.githubusercontent.com/92515117/147103645-f6d91658-4b54-4dc5-a1aa-8ae8865bad20.png)
+![image](https://user-images.githubusercontent.com/92515117/147106638-303f767f-c029-419e-9cb6-16467f2e4074.png)
 
 
 
