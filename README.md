@@ -51,11 +51,63 @@
 
 Считаем файл, будем проходиться построчно:
 
-![image](https://user-images.githubusercontent.com/92515117/147106588-ed84e0d4-5091-4bd6-b222-c0453987a0f1.png)
+```java
+public static void main(String[] args) throws IOException {
+        Utils.parseData("Книга1.csv");
+        List<Building> parsedBuildings = Utils.getParsedBuildings();
+        List<Prefix> parsedPrefixes = Utils.getParsedPrefixes();
+
+        for (int i = 10000; i < 20000; i += 100) {
+            System.out.println(parsedBuildings.get(i).toString());
+        }
+    }
+```
 
 Затем обрабатываем строку, достаем из нее все данные, которые "можно унести с собой":
 
-![image](https://user-images.githubusercontent.com/92515117/147106638-303f767f-c029-419e-9cb6-16467f2e4074.png)
+```java
+    // Главный метод парсера
+    public static void parseData(String path) throws IOException {
+        System.out.println("Запущен процесс парсинга");
+        List<String> fileLines = Files.readAllLines(Paths.get(path));
+        for (String line : fileLines) {
+            processParsedLine(line);
+        }
+        System.out.println("Парсинг завершен");
+    }
+```
+```java
+    // Здесь просиходит парсинг одной строки из CSV
+    // В случае удачного парсинга в лист добавляется новый объект
+    private static void processParsedLine(String line) {
+        try {
+            String[] data = line.replace("\"", "").replace("\'", "").split(";");
+            String number = data[0];
+            String address = data[1];
+            String snapshot = data[2];
+            String description = data[3];
+            String numberOfFloor = data[4];
+            int prefixCode = -1;
+            try {prefixCode = Integer.parseInt(data[5]);} catch (Exception e){}
+            String buildingType = data[6];
+            int id_ = -1;
+            try {id_ = Integer.parseInt(data[5]);} catch (Exception e){}
+            String year = "";
+            if (data.length == 9)
+                year = data[8];
+
+            parsedBuildings.add(new Building(
+                    id_, number, address, getMaterial(snapshot),
+                    year, getFloorsCount(snapshot, numberOfFloor),
+                    description, isHabited(snapshot, buildingType)));
+
+            parsedPrefixes.add(new Prefix(id_, number, prefixCode));
+        }
+        catch (Exception e){
+            System.out.println("Возникла ошибка при парсинге строки: "+line);
+        }
+    }
+```
 
 По окончании этого этапа мы имеем следующее:
 
