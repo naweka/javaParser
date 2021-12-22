@@ -10,6 +10,10 @@ public class Main {
         Utils.parseData("Книга1.csv");
         List<Building> parsedBuildings = Utils.getParsedBuildings();
         List<Prefix> parsedPrefixes = Utils.getParsedPrefixes();
+
+        for (int i = 9000; i < 10000; i += 100) {
+            System.out.println(parsedBuildings.get(i).toString());
+        }
     }
 }
 
@@ -118,6 +122,19 @@ class Building {
         this.buildingTypeFloors = buildingTypeFloors;
         this.description = description;
         this.buildingTypeHabited = buildingTypeHabited;
+    }
+
+    @Override
+    public String toString() {
+        return "\nОбъект Building:" +
+                "\nid_=" + id_ +
+                "\nnumber=" + number +
+                "\naddress=" + address +
+                "\nbuildingTypeMaterial=" + buildingTypeMaterial +
+                "\nyearConstruction=" + yearConstruction +
+                "\nbuildingTypeFloors=" + buildingTypeFloors +
+                "\ndescription=" + description +
+                "\nbuildingTypeHabited=" + buildingTypeHabited;
     }
 }
 
