@@ -28,6 +28,8 @@
 
 Сущность *Префикс*:
 * \[ключ\] prefix_code
+* number
+* id_
 
 Сущность *Здание*:
 * \[ключ\] number
@@ -38,7 +40,6 @@
 * year_construction
 * number_of_floor
 * appelation
-* prefix_code
 
 ### Заключительные штрихи
 Пересохраним CSV файл с другим разделителем для удобства парсинга.
