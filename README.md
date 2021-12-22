@@ -33,8 +33,19 @@
 * \[ключ\] number
 * \[ключ\] id_
 * address
-* snapshot и building_type
+* material
+* habited
 * year_construction
 * number_of_floor
 * appelation
 * prefix_code
+
+### Заключительные штрихи
+Пересохраним CSV файл с другим разделителем для удобства парсинга.
+На этом приготовления закончены, начинаем писать проект
+
+## Парсинг данных
+
+
+
+
