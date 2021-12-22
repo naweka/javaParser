@@ -27,19 +27,19 @@
 ### Разработка структуры будущей базы данных
 
 Сущность *Префикс*:
-* \[ключ\] prefix_code
+* \[ключ\] prefix_code (префикс)
 * number
 * id_
 
 Сущность *Здание*:
 * \[ключ\] number
 * \[ключ\] id_
-* address
-* material
-* habited
-* year_construction
-* number_of_floor
-* appelation
+* address (адрес здания)
+* material (материал, из которого построено здание)
+* habited (жилое ли здание?)
+* year_construction (год постройки)
+* number_of_floor (количество этажей)
+* description (описание назначения здания)
 
 ### Заключительные штрихи
 Пересохраним CSV файл с другим разделителем для удобства парсинга.
