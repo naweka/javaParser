@@ -56,7 +56,7 @@
 ![image](https://user-images.githubusercontent.com/92515117/147106638-303f767f-c029-419e-9cb6-16467f2e4074.png)
 
 По окончании этого этапа мы имеем следующее:
-![image](https://user-images.githubusercontent.com/92515117/147113301-8d58d523-1953-4f62-b341-7f82813c9b2b.png)
+![image](https://user-images.githubusercontent.com/92515117/147113799-3cc4a71b-f9cd-49c4-8041-949214a58e4a.png)
 
 
 
