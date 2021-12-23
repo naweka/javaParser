@@ -41,6 +41,8 @@
 * number_of_floor (количество этажей)
 * description (описание назначения здания)
 
+> _Примечание: так как связть между сущностями "1 ко многим", то промежуточная таблица не требуется_
+
 ### Заключительные штрихи
 Пересохраним CSV файл с другим разделителем для удобства парсинга.
 На этом приготовления закончены, начинаем писать проект.
@@ -136,8 +138,6 @@
 
 Как видим, здесь присутствует всё необходимое
 
-> *Примечание: приложение "SQLite Administrator" необходимо только для создания базы. После этого его можно удалить.*
-
 Подключаем базу данных:
 
 ```java
@@ -148,4 +148,44 @@
         System.out.println("База \""+dbName+"\" подключена!");
     }
 ```
+
+Теперь создадим структуру базы данных с помощью SQLite Admin:
+
+```java
+    public static void createStructure() throws ClassNotFoundException, SQLException {
+        statement = connection.createStatement();
+        statement.executeUpdate(
+                "PRAGMA foreign_keys=on;\n"+
+                "create table if not exists [Buildings] (\n" +
+                "[id] INTEGER  NULL,\n" +
+                "[number] VARCHAR(20)  NULL PRIMARY KEY,\n" +
+                "[address] TEXT  NULL,\n" +
+                "[buildingTypeMaterial] TEXT  NULL,\n" +
+                "[buildingTypeHabited] BOOLEAN  NULL,\n" +
+                "[yearConstruction] TEXT  NULL,\n" +
+                "[buildingTypeFloors] INTEGER  NULL,\n" +
+                "[description] TEXT  NULL,\n" +
+                "FOREIGN KEY (number) REFERENCES Prefixes(number)\n"+
+                ");\n" +
+                "create table if not exists [Prefixes] (\n" +
+                "[prefixCode] INTEGER  NOT NULL PRIMARY KEY,\n" +
+                "[id_] INTEGER  NULL,\n" +
+                "[number] VARCHAR(20) UNIQUE NULL\n" +
+                ");");
+        System.out.println("Процесс настройки структуры базы данных завершен");
+    }
+```
+
+После выполнения можно взглянуть на полученную структуру:
+
+![image](https://user-images.githubusercontent.com/92515117/147199541-6063f4bf-bcd6-4587-a9ff-66fe290bd78e.png)
+
+
+
+
+
+
+
+
+
 
