@@ -205,8 +205,9 @@
 ### Запрос 1. Дома с количеством этажей и их колчиество
 
 ```java
-    public static void getQuery1() throws SQLException {
+    public static Map<String, String> getQuery1() throws SQLException {
         System.out.println("\nДома с кол-вом этажей и их кол-во:");
+        Map<String, String> chartData = new HashMap<String, String>();
         resultSet = statement.executeQuery("select\n" +
                 "    buildingTypeFloors as 'Кол-во этажей',\n" +
                 "    count(buildingTypeFloors) as 'Кол-во таких зданий'\n" +
@@ -215,9 +216,13 @@
                 "group by buildingTypeFloors;");
         while (resultSet.next()) {
             System.out.println(resultSet.getString(1) +"  -  "+resultSet.getString(2));
+            chartData.put(resultSet.getString(1), resultSet.getString(2));
         }
+        return chartData;
     }
 ```
+
+> "Map<String, String> chartData" - это данные для построения гистограммы
 
 Вывод:
 
@@ -270,12 +275,31 @@
 
 ![image](https://user-images.githubusercontent.com/92515117/147228223-cc4ea274-1457-46c4-a313-03c880124607.png)
 
+## Строим график (гистограмму)
 
+Для построения графика по первому запросу воспользуемся библиотекой [JFreeChart](https://www.jfree.org/jfreechart/download.html). Скачаем и установим (подключим две библиотеки):
 
+![image](https://user-images.githubusercontent.com/92515117/147253232-89bcb6b8-507a-4a13-b4c2-67c25c147ffe.png)
 
+Создадим, а также заполним данные в графике:
 
+```java
+    private CategoryDataset createDataset() throws SQLException {
+        Map<String, String> chartData = DBUtils.getQuery1();
+        final DefaultCategoryDataset dataset = new DefaultCategoryDataset( );
 
+        for (String a: chartData.keySet())
+            dataset.addValue( Float.parseFloat(chartData.get(a)) , a, "Количество этажей" );
+        
+        return dataset;
+    }
+```
 
+По завершении этого этапа имеем гистограмму:
 
+![image](https://user-images.githubusercontent.com/92515117/147253732-0affcccd-cfc6-4081-95d5-1dffb9512544.png)
 
+## Подведение итогов
+
+По окончании этой работы были получены навыки работы с базами данных SQLite и в построении графиков в Java, а также был закреплён материал курса.
 
