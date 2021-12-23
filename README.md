@@ -60,10 +60,6 @@
         Utils.parseData("Книга1.csv");
         List<Building> parsedBuildings = Utils.getParsedBuildings();
         List<Prefix> parsedPrefixes = Utils.getParsedPrefixes();
-
-        for (int i = 10000; i < 20000; i += 100) {
-            System.out.println(parsedBuildings.get(i).toString());
-        }
     }
 ```
 
