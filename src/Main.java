@@ -3,23 +3,68 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.ui.ApplicationFrame;
+import org.jfree.ui.RefineryUtilities;
 
 public class Main {
 
     public static void main(String[] args) throws IOException, SQLException, ClassNotFoundException {
+        // Если база данных не создана и не заполнена, нужно раскомментировать код ниже
         //Parser.parseData("Книга1.csv");
         //List<Building> parsedBuildings = Parser.getParsedBuildings();
         //List<Prefix> parsedPrefixes = Parser.getParsedPrefixes();
 
         DBUtils.connect("dbTerentev.s3db");
 
+        // Если база данных не создана и не заполнена, нужно раскомментировать код ниже
         //DBUtils.createStructure();
         //DBUtils.fillDataToDB(parsedBuildings, parsedPrefixes);
 
         DBUtils.getQuery1();
         DBUtils.getQuery2();
         DBUtils.getQuery3();
+
+        Chart chart = new Chart();
+        chart.pack();
+        RefineryUtilities.centerFrameOnScreen(chart);
+        chart.setVisible(true);
+    }
+}
+
+class Chart extends ApplicationFrame {
+
+    public Chart() throws SQLException {
+        super("");
+        JFreeChart barChart = ChartFactory.createBarChart(
+                "Соотношение количества домов с разным количеством этажей",
+                "Количество этажей",
+                "Количество зданий",
+                createDataset(),
+                PlotOrientation.VERTICAL,
+                true, true, false);
+        ChartPanel chartPanel = new ChartPanel( barChart );
+        chartPanel.setPreferredSize(new java.awt.Dimension(800 , 600) );
+        setContentPane(chartPanel);
+    }
+
+    private CategoryDataset createDataset() throws SQLException {
+        Map<String, String> chartData = DBUtils.getQuery1();
+        final DefaultCategoryDataset dataset = new DefaultCategoryDataset( );
+
+        for (String a: chartData.keySet())
+            dataset.addValue( Float.parseFloat(chartData.get(a)) , a, "Количество этажей" );
+
+        return dataset;
     }
 }
 
@@ -28,8 +73,9 @@ class DBUtils {
     public static Statement statement;
     public static ResultSet resultSet;
 
-    public static void getQuery1() throws SQLException {
+    public static Map<String, String> getQuery1() throws SQLException {
         System.out.println("\nДома с кол-вом этажей и их кол-во:");
+        Map<String, String> chartData = new HashMap<String, String>();
         resultSet = statement.executeQuery("select\n" +
                 "    buildingTypeFloors as 'Кол-во этажей',\n" +
                 "    count(buildingTypeFloors) as 'Кол-во таких зданий'\n" +
@@ -38,7 +84,9 @@ class DBUtils {
                 "group by buildingTypeFloors;");
         while (resultSet.next()) {
             System.out.println(resultSet.getString(1) +"  -  "+resultSet.getString(2));
+            chartData.put(resultSet.getString(1), resultSet.getString(2));
         }
+        return chartData;
     }
 
     public static void getQuery2() throws SQLException {
