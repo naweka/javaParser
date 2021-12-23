@@ -146,7 +146,7 @@
     }
 ```
 
-Теперь создадим структуру базы данных с помощью SQLite Admin:
+Теперь создадим структуру базы данных:
 
 ```java
     public static void createStructure() throws ClassNotFoundException, SQLException {
