@@ -145,6 +145,7 @@
         System.out.println("Подключение к базе данных \""+dbName+"\"...");
         Class.forName("org.sqlite.JDBC");
         connection = DriverManager.getConnection("jdbc:sqlite:"+dbName);
+        statement = connection.createStatement();
         System.out.println("База \""+dbName+"\" подключена!");
     }
 ```
@@ -153,7 +154,7 @@
 
 ```java
     public static void createStructure() throws ClassNotFoundException, SQLException {
-        statement = connection.createStatement();
+        System.out.println("Настройка базы данных...");
         statement.executeUpdate(
                 "PRAGMA foreign_keys=on;\n"+
                 "create table if not exists [Buildings] (\n" +
@@ -168,9 +169,9 @@
                 "FOREIGN KEY (number) REFERENCES Prefixes(number)\n"+
                 ");\n" +
                 "create table if not exists [Prefixes] (\n" +
-                "[prefixCode] INTEGER  NOT NULL PRIMARY KEY,\n" +
+                "[prefixCode] INTEGER  NULL,\n" +
                 "[id_] INTEGER  NULL,\n" +
-                "[number] VARCHAR(20) UNIQUE NULL\n" +
+                "[number] VARCHAR(20) PRIMARY KEY UNIQUE NOT NULL\n" +
                 ");");
         System.out.println("Процесс настройки структуры базы данных завершен");
     }
@@ -180,9 +181,28 @@
 
 ![image](https://user-images.githubusercontent.com/92515117/147199541-6063f4bf-bcd6-4587-a9ff-66fe290bd78e.png)
 
+## Заполнение базы данных
 
+Для повышения производительности будем заполнять за раз не по одной строке , а по несколько INSERT'ов в транзакции:
 
+```java
+    private static void fillPrefixesTable(List<Prefix> parsedPrefixes, int querySize, int sizePrefixes) {
+        for (int i = 0; i < sizePrefixes; i += querySize)
+            try {
+                System.out.print("Процесс заполнения таблицы префиксов:"+String.format("%.2f", (float)i/(float) sizePrefixes *100.0f)+"%\r");
 
+                String query = "BEGIN TRANSACTION;\n";
+                for (int j = 0; j < querySize; j++) {
+                    Prefix prefix = parsedPrefixes.get(i+j);
+                    query += "INSERT INTO 'Prefixes' ('prefixCode', 'id_', 'number')" +
+                            " VALUES (" + prefix.prefix_code + ", " + prefix.id_ + ", '" + prefix.number + "');\n";
+                }
+                statement.executeUpdate(query+"COMMIT;");
+            } catch (Exception e) {}
+    }
+```
+
+Аналогичный код будет и для таблицы "Buildings". По окончании заполнения закомментируем вызовы методов ```createStructure``` и ```fillDataToDB```, так как их функционал нам больше не потербуется.
 
 
 
