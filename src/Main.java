@@ -1,23 +1,158 @@
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException {
-        Utils.parseData("Книга1.csv");
-        List<Building> parsedBuildings = Utils.getParsedBuildings();
-        List<Prefix> parsedPrefixes = Utils.getParsedPrefixes();
+    public static void main(String[] args) throws IOException, SQLException, ClassNotFoundException {
+        //Parser.parseData("Книга1.csv");
+        //List<Building> parsedBuildings = Parser.getParsedBuildings();
+        //List<Prefix> parsedPrefixes = Parser.getParsedPrefixes();
 
-        for (int i = 9000; i < 10000; i += 100) {
-            System.out.println(parsedBuildings.get(i).toString());
-        }
+        DBUtils.connect("dbTerentev.s3db");
+
+        //DBUtils.createStructure();
+        //DBUtils.fillDataToDB(parsedBuildings, parsedPrefixes);
+
+        DBUtils.getQuery1();
+        DBUtils.getQuery2();
+        DBUtils.getQuery3();
     }
 }
 
-class Utils {
+class DBUtils {
+    public static Connection connection;
+    public static Statement statement;
+    public static ResultSet resultSet;
+
+    public static void getQuery1() throws SQLException {
+        System.out.println("\nДома с кол-вом этажей и их кол-во:");
+        resultSet = statement.executeQuery("select\n" +
+                "    buildingTypeFloors as 'Кол-во этажей',\n" +
+                "    count(buildingTypeFloors) as 'Кол-во таких зданий'\n" +
+                "from Buildings\n" +
+                "where buildingTypeFloors > 0\n" +
+                "group by buildingTypeFloors;");
+        while (resultSet.next()) {
+            System.out.println(resultSet.getString(1) +"  -  "+resultSet.getString(2));
+        }
+    }
+
+    public static void getQuery2() throws SQLException {
+        System.out.println("\nЗарегистрированные участки, по улице шлиссельбургское шоссе с префиксом 9881:");
+        resultSet = statement.executeQuery("select\n" +
+                "    description,\n" +
+                "    address\n" +
+                "from Buildings inner join Prefixes\n" +
+                "on Buildings.number = Prefixes.number\n" +
+                "where\n" +
+                "    address like '%лиссель%шоссе%'\n" +
+                "    and prefixCode = 9881\n" +
+                "    and description like '%арегистри%часто%';");
+        while (resultSet.next()) {
+            System.out.println(resultSet.getString(1) +"  -  "+resultSet.getString(2));
+        }
+    }
+
+    public static void getQuery3() throws SQLException {
+        System.out.println("\nУниверситеты выше 5 этажа с известным годом постройки и вычислите средний prefix_code:");
+        resultSet = statement.executeQuery("select\n" +
+                "    avg(prefixCode) as 'Средний префикс'\n" +
+                "from Buildings inner join Prefixes\n" +
+                "on Buildings.number = Prefixes.number\n" +
+                "where\n" +
+                "    yearConstruction <> ''\n" +
+                "    and buildingTypeFloors > 5\n" +
+                "    and description like '%ниверсит%';");
+        while (resultSet.next()) {
+            System.out.println(resultSet.getString(1));
+        }
+    }
+
+    public static void connect(String dbName) throws ClassNotFoundException, SQLException {
+        System.out.println("Подключение к базе данных \""+dbName+"\"...");
+        Class.forName("org.sqlite.JDBC");
+        connection = DriverManager.getConnection("jdbc:sqlite:"+dbName);
+        statement = connection.createStatement();
+        System.out.println("База \""+dbName+"\" подключена!");
+    }
+
+    // Здесь по таблицам заполняются данные
+    public static void fillDataToDB(List<Building> parsedBuildings, List<Prefix> parsedPrefixes) throws SQLException {
+        System.out.println("Заполнение базы данных...");
+        int querySize = 800;
+        int sizePrefixes = parsedPrefixes.size();
+        int sizeBuildings = parsedBuildings.size();
+
+        fillPrefixesTable(parsedPrefixes, querySize, sizePrefixes);
+        fillBuildingsTable(parsedBuildings, querySize, sizeBuildings);
+
+        System.out.println("Заполнение базы данных прошло успешно!");
+    }
+
+    private static void fillBuildingsTable(List<Building> parsedBuildings, int querySize, int sizeBuildings) {
+        for (int i = 0; i < sizeBuildings; i += querySize)
+            try {
+                System.out.print("Процесс заполнения таблицы зданий:"+String.format("%.2f", (float)i/(float) sizeBuildings *100.0f)+"%\r");
+
+                String query = "BEGIN TRANSACTION;\n";
+                for (int j = 0; j < querySize; j++) {
+                    Building building = parsedBuildings.get(i+j);
+                    query += "INSERT INTO 'Buildings' ('id', 'number', 'address', 'buildingTypeMaterial', 'buildingTypeHabited'," +
+                            " 'yearConstruction', 'buildingTypeFloors', 'description')" +
+                            " VALUES ("+building.id_+", '"+building.number+"', '"+building.address+"', '"+
+                            building.buildingTypeMaterial+"', "+(building.buildingTypeHabited?1:0)+", '"+
+                            building.yearConstruction+"', "+building.buildingTypeFloors+", '"+building.description+"');\n";
+                }
+                statement.executeUpdate(query+"COMMIT;");
+            } catch (Exception e) {}
+    }
+
+    private static void fillPrefixesTable(List<Prefix> parsedPrefixes, int querySize, int sizePrefixes) {
+        for (int i = 0; i < sizePrefixes; i += querySize)
+            try {
+                System.out.print("Процесс заполнения таблицы префиксов:"+String.format("%.2f", (float)i/(float) sizePrefixes *100.0f)+"%\r");
+
+                String query = "BEGIN TRANSACTION;\n";
+                for (int j = 0; j < querySize; j++) {
+                    Prefix prefix = parsedPrefixes.get(i+j);
+                    query += "INSERT INTO 'Prefixes' ('prefixCode', 'id_', 'number')" +
+                            " VALUES (" + prefix.prefix_code + ", " + prefix.id_ + ", '" + prefix.number + "');\n";
+                }
+                statement.executeUpdate(query+"COMMIT;");
+            } catch (Exception e) {}
+    }
+
+    // Здесь происходит создание таблиц в случае если их нет (бд пустая)
+    public static void createStructure() throws ClassNotFoundException, SQLException {
+        System.out.println("Настройка базы данных...");
+        statement.executeUpdate(
+                "PRAGMA foreign_keys=on;\n"+
+                "create table if not exists [Buildings] (\n" +
+                "[id] INTEGER  NULL,\n" +
+                "[number] VARCHAR(20)  NULL PRIMARY KEY,\n" +
+                "[address] TEXT  NULL,\n" +
+                "[buildingTypeMaterial] TEXT  NULL,\n" +
+                "[buildingTypeHabited] BOOLEAN  NULL,\n" +
+                "[yearConstruction] TEXT  NULL,\n" +
+                "[buildingTypeFloors] INTEGER  NULL,\n" +
+                "[description] TEXT  NULL,\n" +
+                "FOREIGN KEY (number) REFERENCES Prefixes(number)\n"+
+                ");\n" +
+                "create table if not exists [Prefixes] (\n" +
+                "[prefixCode] INTEGER  NULL,\n" +
+                "[id_] INTEGER  NULL,\n" +
+                "[number] VARCHAR(20) PRIMARY KEY UNIQUE NOT NULL\n" +
+                ");");
+        System.out.println("Процесс настройки структуры базы данных завершен");
+    }
+}
+
+// В этом классе происходит парсинг CSV
+class Parser {
     private static List<Building> parsedBuildings = new ArrayList<Building>();
     private static List<Prefix> parsedPrefixes = new ArrayList<Prefix>();
 
@@ -25,7 +160,7 @@ class Utils {
     public static void parseData(String path) throws IOException {
         System.out.println("Запущен процесс парсинга");
         List<String> fileLines = Files.readAllLines(Paths.get(path));
-        for (String line : fileLines) {
+        for (String line : fileLines.subList(2,fileLines.size()-1)) {
             processParsedLine(line);
         }
         System.out.println("Парсинг завершен");
@@ -48,7 +183,7 @@ class Utils {
             try {prefixCode = Integer.parseInt(data[5]);} catch (Exception e){}
             String buildingType = data[6];
             int id_ = -1;
-            try {id_ = Integer.parseInt(data[5]);} catch (Exception e){}
+            try {id_ = Integer.parseInt(data[7]);} catch (Exception e){}
             String year = "";
             if (data.length == 9)
                 year = data[8];
