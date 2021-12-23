@@ -204,6 +204,80 @@
 
 Аналогичный код будет и для таблицы "Buildings". По окончании заполнения закомментируем вызовы методов ```createStructure``` и ```fillDataToDB```, так как их функционал нам больше не потербуется.
 
+## Выполнение запросов
+
+### Запрос 1. Дома с количеством этажей и их колчиество
+
+```java
+    public static void getQuery1() throws SQLException {
+        System.out.println("\nДома с кол-вом этажей и их кол-во:");
+        resultSet = statement.executeQuery("select\n" +
+                "    buildingTypeFloors as 'Кол-во этажей',\n" +
+                "    count(buildingTypeFloors) as 'Кол-во таких зданий'\n" +
+                "from Buildings\n" +
+                "where buildingTypeFloors > 0\n" +
+                "group by buildingTypeFloors;");
+        while (resultSet.next()) {
+            System.out.println(resultSet.getString(1) +"  -  "+resultSet.getString(2));
+        }
+    }
+```
+
+Вывод:
+
+![image](https://user-images.githubusercontent.com/92515117/147228139-c81bf1ef-5bdf-4d0b-af76-0e3544889ed0.png)
+
+### Запрос 2. Зарегистрированные участки, по улице Шлиссельбургское шоссе с префиксом 9881
+
+```java
+    public static void getQuery2() throws SQLException {
+        System.out.println("\nЗарегистрированные участки, по улице шлиссельбургское шоссе с префиксом 9881:");
+        resultSet = statement.executeQuery("select\n" +
+                "    description,\n" +
+                "    address\n" +
+                "from Buildings inner join Prefixes\n" +
+                "on Buildings.number = Prefixes.number\n" +
+                "where\n" +
+                "    address like '%лиссель%шоссе%'\n" +
+                "    and prefixCode = 9881\n" +
+                "    and description like '%арегистри%часто%';");
+        while (resultSet.next()) {
+            System.out.println(resultSet.getString(1) +"  -  "+resultSet.getString(2));
+        }
+    }
+```
+
+Вывод:
+
+![image](https://user-images.githubusercontent.com/92515117/147228173-995ae393-6f19-42fc-b6b3-5c6eabfc37cd.png)
+
+### Запрос 3. Средний префикс для университетов выше 5 этажа с известным годом постройки
+
+```java
+    public static void getQuery3() throws SQLException {
+        System.out.println("\nУниверситеты выше 5 этажа с известным годом постройки и вычислите средний prefix_code:");
+        resultSet = statement.executeQuery("select\n" +
+                "    avg(prefixCode) as 'Средний префикс'\n" +
+                "from Buildings inner join Prefixes\n" +
+                "on Buildings.number = Prefixes.number\n" +
+                "where\n" +
+                "    yearConstruction <> ''\n" +
+                "    and buildingTypeFloors > 5\n" +
+                "    and description like '%ниверсит%';");
+        while (resultSet.next()) {
+            System.out.println(resultSet.getString(1));
+        }
+    }
+```
+
+Вывод:
+
+![image](https://user-images.githubusercontent.com/92515117/147228223-cc4ea274-1457-46c4-a313-03c880124607.png)
+
+
+
+
+
 
 
 
