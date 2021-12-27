@@ -94,7 +94,6 @@ public class Database {
 
     // Здесь происходит создание таблиц в случае если их нет (бд пустая)
     public static void createStructure() throws SQLException {
-        System.out.println("Процесс настройки структуры базы данных завершен");
         execUpdateQuery(
                 "Настройка базы данных...",
                 """
