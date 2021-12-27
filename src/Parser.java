@@ -6,12 +6,12 @@ import java.util.List;
 
 // В этом классе происходит парсинг CSV
 public class Parser {
-    private static List<Building> parsedBuildings = new ArrayList<>();
-    private static List<Prefix> parsedPrefixes = new ArrayList<>();
-    public static List<Building> getParsedBuildings() {
+    private static List<TableItem.Building> parsedBuildings = new ArrayList<>();
+    private static List<TableItem.Prefix> parsedPrefixes = new ArrayList<>();
+    public static List<TableItem.Building> getParsedBuildings() {
         return parsedBuildings;
     }
-    public static List<Prefix> getParsedPrefixes() {
+    public static List<TableItem.Prefix> getParsedPrefixes() {
         return parsedPrefixes;
     }
 
@@ -44,12 +44,12 @@ public class Parser {
             if (data.length == 9)
                 year = data[8];
 
-            parsedBuildings.add(new Building(
+            parsedBuildings.add(new TableItem.Building(
                     id_, number, address, getMaterial(snapshot),
                     year, getFloorsCount(snapshot, numberOfFloor),
                     description, isHabited(snapshot, buildingType)));
 
-            parsedPrefixes.add(new Prefix(id_, number, prefixCode));
+            parsedPrefixes.add(new TableItem.Prefix(id_, number, prefixCode));
         } catch (Exception e) {
             System.out.println("Возникла ошибка при парсинге строки: " + line);
         }

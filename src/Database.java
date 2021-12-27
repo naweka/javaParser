@@ -45,7 +45,7 @@ public class Database {
     }
 
     // Здесь по таблицам заполняются данные
-    public static void fillDataToDB(List<Building> parsedBuildings, List<Prefix> parsedPrefixes) {
+    public static void fillDataToDB(List<TableItem.Building> parsedBuildings, List<TableItem.Prefix> parsedPrefixes) {
         System.out.println("Заполнение базы данных...");
         int querySize = 800;
         int sizePrefixes = parsedPrefixes.size();
@@ -57,14 +57,14 @@ public class Database {
         System.out.println("Заполнение базы данных прошло успешно!");
     }
 
-    private static void fillBuildingsTable(List<Building> parsedBuildings, int querySize, int sizeBuildings) {
+    private static void fillBuildingsTable(List<TableItem.Building> parsedBuildings, int querySize, int sizeBuildings) {
         for (int i = 0; i < sizeBuildings; i += querySize)
             try {
                 System.out.print("Процесс заполнения таблицы зданий:" + String.format("%.2f", (float) i / (float) sizeBuildings * 100.0f) + "%\r");
 
                 String query = "BEGIN TRANSACTION;\n";
                 for (int j = 0; j < querySize; j++) {
-                    Building building = parsedBuildings.get(i + j);
+                    TableItem.Building building = parsedBuildings.get(i + j);
                     query += "INSERT INTO 'Buildings' ('id', 'number', 'address', 'buildingTypeMaterial', 'buildingTypeHabited'," +
                             " 'yearConstruction', 'buildingTypeFloors', 'description')" +
                             " VALUES (" + building.id_ + ", '" + building.number + "', '" + building.address + "', '" +
@@ -76,14 +76,14 @@ public class Database {
             }
     }
 
-    private static void fillPrefixesTable(List<Prefix> parsedPrefixes, int querySize, int sizePrefixes) {
+    private static void fillPrefixesTable(List<TableItem.Prefix> parsedPrefixes, int querySize, int sizePrefixes) {
         for (int i = 0; i < sizePrefixes; i += querySize)
             try {
                 System.out.print("Процесс заполнения таблицы префиксов:" + String.format("%.2f", (float) i / (float) sizePrefixes * 100.0f) + "%\r");
 
                 String query = "BEGIN TRANSACTION;\n";
                 for (int j = 0; j < querySize; j++) {
-                    Prefix prefix = parsedPrefixes.get(i + j);
+                    TableItem.Prefix prefix = parsedPrefixes.get(i + j);
                     query += "INSERT INTO 'Prefixes' ('prefixCode', 'id_', 'number')" +
                             " VALUES (" + prefix.prefix_code + ", " + prefix.id_ + ", '" + prefix.number + "');\n";
                 }
